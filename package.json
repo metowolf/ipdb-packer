@@ -1,0 +1,11 @@
+{
+  "name": "@ipdb/packer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "files": [
+    "index.js"
+  ],
+  "repository": "git@github.com:metowolf/ipdb-packer.git",
+  "author": "metowolf <i@i-meto.com>",
+  "license": "MIT"
+}
