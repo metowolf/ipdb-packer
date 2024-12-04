@@ -1,7 +1,6 @@
 const net = require('net')
-const EventEmitter = require('events')
 
-class Packer extends EventEmitter {
+class Packer {
   constructor(options = {}) {
     super()
     this.node = [[null, null]]
@@ -26,25 +25,17 @@ class Packer extends EventEmitter {
   }
 
   output(fields) {
-
-    this.emit('start')
-    let process_current = 0
-    let process_total = 1 + 1 + this.node.length + 1 + 1 + this.node.length + 1
-
     // meta fields
     this.meta.fields = fields
-    this.emit('process', ++process_current, process_total)
 
     // meta node_count
     let node_count = this.node.length
     this.meta.node_count = node_count
-    this.emit('process', ++process_current, process_total)
 
     // fix null node
     let null_count = 0
     let null_offset = this._getOffset(new Array(fields.length).fill(''))
     for (let i = 0; i < this.node.length; i += 1) {
-      this.emit('process', ++process_current, process_total)
       for (let j = 0; j < 2; j += 1) {
         if (this.node[i][j] === null) {
           null_count += 1
@@ -55,17 +46,14 @@ class Packer extends EventEmitter {
 
     // make data chunk
     this.data = Buffer.concat(this.data)
-    this.emit('process', ++process_current, process_total)
 
     // v4 node offset
     let v4node = this._getNode('0.0.0.0/1')[0]
     this.meta.v4node = v4node
-    this.emit('process', ++process_current, process_total)
 
     // node chunk
     let node_chunk = Buffer.alloc(this.node.length << 3)
     for (let i = 0; i < this.node.length; i += 1) {
-      this.emit('process', ++process_current, process_total)
       for (let j = 0; j < 2; j += 1) {
         if (this.node[i][j] <= 0) {
           this.node[i][j] = node_count - this.node[i][j]
@@ -87,10 +75,8 @@ class Packer extends EventEmitter {
     let header_chunk = Buffer.alloc(4)
     header_chunk.writeUInt32BE(header_len)
     header_chunk = Buffer.concat([header_chunk, header])
-    this.emit('process', ++process_current, process_total)
 
     // final
-    this.emit('end')
     return Buffer.concat([header_chunk, node_chunk, loopback_chunk, this.data])
   }
 
