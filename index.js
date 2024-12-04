@@ -26,6 +26,7 @@ class Packer extends EventEmitter {
   }
 
   output(fields) {
+
     this.emit('start')
     let process_current = 0
     let process_total = 1 + 1 + this.node.length + 1 + 1 + this.node.length + 1
@@ -74,8 +75,13 @@ class Packer extends EventEmitter {
       }
     }
 
+    // loopback chunk
+    let loopback_chunk = Buffer.alloc(1 << 3)
+    let buf = this._toNodeBuffer(node_count, node_count)
+    buf.copy(loopback_chunk, 0)
+
     // header chunk
-    this.meta.total_size = node_chunk.length + this.data.length
+    this.meta.total_size = node_chunk.length + loopback_chunk.length + this.data.length
     let header = Buffer.from(JSON.stringify(this.meta))
     let header_len = header.length
     let header_chunk = Buffer.alloc(4)
@@ -85,7 +91,7 @@ class Packer extends EventEmitter {
 
     // final
     this.emit('end')
-    return Buffer.concat([header_chunk, node_chunk, this.data])
+    return Buffer.concat([header_chunk, node_chunk, loopback_chunk, this.data])
   }
 
   _toNodeBuffer(left, right) {
@@ -120,7 +126,7 @@ class Packer extends EventEmitter {
       let buf = Buffer.from(data)
       let len = Buffer.alloc(2)
       len.writeUInt16BE(buf.length)
-      this.data_hash[data] = this.data_size
+      this.data_hash[data] = this.data_size + 8
       this.data.push(Buffer.concat([len, buf]))
       this.data_size += len.length + buf.length
     }
