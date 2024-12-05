@@ -2,7 +2,6 @@ const net = require('net')
 
 class Packer {
   constructor(options = {}) {
-    super()
     this.node = [[null, null]]
     this.data = []
     this.data_hash = {}
