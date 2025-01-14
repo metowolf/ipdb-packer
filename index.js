@@ -38,7 +38,7 @@ class Packer {
       for (let j = 0; j < 2; j += 1) {
         if (this.node[i][j] === null) {
           null_count += 1
-          this.node[i][j] = null_offset
+          this.node[i][j] = -null_offset
         }
       }
     }
@@ -94,9 +94,12 @@ class Packer {
 
   _getNode(cidr) {
     let [ip, mask] = this._toBin(cidr)
+    if (mask < 1) {
+      mask = 1
+    }
     let node = 0
     for (let i = 0; i < mask - 1; i += 1) {
-      if (this.node[node][ip[i]] === null) {
+      if (this.node[node][ip[i]] === null || this.node[node][ip[i]] < 0) {
         this.node.push([null, null])
         this.node[node][ip[i]] = this.node.length - 1
       }
